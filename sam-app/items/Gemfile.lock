@@ -1,0 +1,13 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    multipart-parser (0.1.1)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  multipart-parser (~> 0.1.1)
+
+BUNDLED WITH
+   2.1.4

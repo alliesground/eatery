@@ -1,17 +1,19 @@
 # require 'httparty'
 require 'aws-sdk-s3'
 require 'json'
+require 'base64'
+require './util'
 
 def create(event:, context:)
 
-  # save data 
-  # get id of the data
-  # use that id as a part of key name for s3 object
+  parsed_event_body = Util.parse_multipart_hash(event)
 
-  id = 1
+  mime = parsed_event_body["file"][:mime]
+  file_extension = /\/(.*)/.match(mime)[1]
+
+  index = 1
   title = 'test_item'
-
-  key_name = "items/test/#{id}.#{title}"
+  key_name = "items/test/#{index}_#{title}.#{file_extension}"
 
   s3 = Aws::S3::Client.new(
     access_key_id: 'AKIAQSJMQ6OMPB75OJ7U',
@@ -22,7 +24,7 @@ def create(event:, context:)
   s3.put_object(
     bucket: 'restro-development',
     key: key_name,
-    body: event['body']
+    body: Base64.encode64(parsed_event_body["file"][:data])
   )
 
   {

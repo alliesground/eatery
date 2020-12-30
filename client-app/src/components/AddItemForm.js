@@ -76,6 +76,7 @@ const AddItemForm = () => {
 
     const data = new FormData()
     data.append("file", selectedFiles)
+    data.append("title", 'new product')
     postItem(data);
 
   }
