@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import useFormValidation from '../hooks/useFormValidation';
 
 const AddItemForm = () => {
@@ -18,6 +18,8 @@ const AddItemForm = () => {
   const [isSubmitted, setIsSubmitted] = useState(false)
 
   const [selectedFiles, setSelectedFiles] = useState(null)
+
+  const form = useRef(null)
 
   const resetForm = () => {
     setItem({
@@ -60,6 +62,10 @@ const AddItemForm = () => {
     // adding items locally, not persisted in database
     setItems(items.concat(item))
 
+    const data = new FormData(form.current)
+
+    postItem(data);
+
     resetForm()
 
     alert("Successfully added new item")
@@ -71,14 +77,8 @@ const AddItemForm = () => {
   } = useFormValidation(submitForm, isSubmitted)
 
   const handleSubmit = (e) => {
-    // setIsSubmitted(true)
-    // handlePresenceValidation({...item});
-
-    const data = new FormData()
-    data.append("file", selectedFiles)
-    data.append("title", 'new product')
-    postItem(data);
-
+    setIsSubmitted(true)
+    handlePresenceValidation({...item});
   }
 
   async function postItem(data) {
@@ -122,7 +122,7 @@ const AddItemForm = () => {
 
       <h1>Add Item Form</h1>
 
-      <form>
+      <form ref={form}>
         <input
           type="text" 
           name="name"
@@ -160,7 +160,7 @@ const AddItemForm = () => {
 
         <input 
           type="file" 
-          name="item-image" 
+          name="file" 
           onChange={handleImageChange}
         />
 
