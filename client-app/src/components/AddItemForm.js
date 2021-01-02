@@ -42,19 +42,25 @@ const AddItemForm = () => {
     })
   }
 
-  const handleImageChange = (e) => {
-    console.log(e.target.files[0].name);
-    setSelectedFiles(e.target.files[0]);
+  const handleFileChange = (e) => {
+    // Validate file
+    if(isValidFile(e)) setSelectedFiles(e.target.files[0]) 
   }
 
-  const handleImageUpload = (e) => {
-    // Send file to AWS s3
+  const isValidFile = (e) => {
+    checkFileMimeType(e.target.files[0])
+  }
 
-    if(selectedFiles) {
-      selectedFiles.forEach(file => {
-        console.log('uploaded file: ', file)
-      })
+  const checkFileMimeType = (file) => {
+    const types = ['image/png', 'image/jpeg', 'image.gif']
+    if(types.every(type => file.type !== type)) {
+
+      const errMsg = file.type + ' is not supported format\n'
+
+      console.log(errMsg)
+      return false
     }
+    return true
   }
 
   const submitForm = () => {
@@ -161,7 +167,7 @@ const AddItemForm = () => {
         <input 
           type="file" 
           name="file" 
-          onChange={handleImageChange}
+          onChange={handleFileChange}
         />
 
         <br></br>
