@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import useFormValidation from '../hooks/useFormValidation';
 
 const AddItemForm = () => {
@@ -8,18 +8,19 @@ const AddItemForm = () => {
   const initialState = {
     name: "",
     description: "",
-    price: ""
+    price: "",
+    file: null
   }
 
   const [items, setItems] = useState([])
 
-  const [item, setItem] = useState(initialState);
+  const [item, setItem] = useState(initialState)
 
   const [isSubmitted, setIsSubmitted] = useState(false)
 
-  const [selectedFiles, setSelectedFiles] = useState(null)
-
   const form = useRef(null)
+
+  const fileField = useRef(null)
 
   const resetForm = () => {
     setItem({
@@ -27,13 +28,9 @@ const AddItemForm = () => {
       description: '',
       price: ''
     })
+
+    fileField.current.value = null
   }
-
-  const onDrop = useCallback(acceptedFiles => {
-
-    setSelectedFiles(acceptedFiles);
-
-  }, [])
 
   const handleItemChange = (e) => {
     setItem({
@@ -43,23 +40,39 @@ const AddItemForm = () => {
   }
 
   const handleFileChange = (e) => {
-    // Validate file
-    if(isValidFile(e)) setSelectedFiles(e.target.files[0]) 
+    if(isValidFile(e)){
+      setItem({
+        ...item,
+        file: e.target.files
+      })
+    }
   }
 
   const isValidFile = (e) => {
-    checkFileMimeType(e.target.files[0])
+    return checkFileMimeType(e)
   }
 
-  const checkFileMimeType = (file) => {
+  const checkFileMimeType = (e) => {
+
+    const files = e.target.files
     const types = ['image/png', 'image/jpeg', 'image.gif']
-    if(types.every(type => file.type !== type)) {
 
-      const errMsg = file.type + ' is not supported format\n'
+    let errMsg = ""
 
-      console.log(errMsg)
+    for(const file of files) {
+      if(types.every(type => file.type !== type)) {
+
+        errMsg += file.type + ' is not supported format.\n Only png, jpeg and gif files are supported.'
+      }
+    }
+
+    if(errMsg !== "") {
+      e.target.value = null
+
+      alert(errMsg)
       return false
     }
+
     return true
   }
 
@@ -167,7 +180,9 @@ const AddItemForm = () => {
         <input 
           type="file" 
           name="file" 
+          multiple
           onChange={handleFileChange}
+          ref={fileField}
         />
 
         <br></br>
