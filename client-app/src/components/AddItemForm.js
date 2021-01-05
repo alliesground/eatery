@@ -44,7 +44,7 @@ const AddItemForm = () => {
       setItem({
         ...item,
         file: e.target.files
-      })
+      }) 
     }
   }
 
@@ -119,6 +119,19 @@ const AddItemForm = () => {
 
   const errorList = Object.entries(errors)
 
+  const renderSelectedFiles = () => {
+
+    let selectedFiles = [];
+
+    if(item.file) {
+      for(let x = 0; x < item.file.length; x++) {
+        selectedFiles.push(<div key={x}>{item.file[x].name}</div>)
+      }
+    }
+    
+    return selectedFiles;
+  }
+
   return(
     <div>
       <ul>
@@ -175,6 +188,12 @@ const AddItemForm = () => {
         </input>
 
         <br></br>
+        <br></br>
+
+        <div>
+          { renderSelectedFiles() }
+        </div>
+
         <br></br>
 
         <input 
