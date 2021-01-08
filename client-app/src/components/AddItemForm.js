@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import useFormValidation from '../hooks/useFormValidation';
+import axios from 'axios';
 
 const AddItemForm = () => {
 
@@ -17,6 +18,8 @@ const AddItemForm = () => {
   const [item, setItem] = useState(initialState)
 
   const [isSubmitted, setIsSubmitted] = useState(false)
+
+  const [fileLoaded, setFileLoaded] = useState(0)
 
   const form = useRef(null)
 
@@ -100,22 +103,34 @@ const AddItemForm = () => {
     handlePresenceValidation({...item});
   }
 
-  async function postItem(data) {
-    try {
-      let res = await fetch(`${API_URL}/items`, {
-        method: 'POST',
-        body: data,
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-
-      console.log(res.statusText)
-
-    } catch (error) {
-      throw new Error(error);
-    }
+  const postItem = (data) => {
+    axios.post(`${API_URL}/items`, data, {
+      onUploadProgress: (ProgressEvent) => {
+        setFileLoaded(ProgressEvent.loaded / ProgressEvent.total * 100)
+      }
+    })
+      .then(res => {
+        console.log(res.statusText)
+      })
   }
+
+
+  // async function postItem(data) {
+  //   try {
+  //     let res = await fetch(`${API_URL}/items`, {
+  //       method: 'POST',
+  //       body: data,
+  //       headers: {
+  //         'Accept': 'application/json'
+  //       }
+  //     });
+
+  //     console.log(res.statusText)
+
+  //   } catch (error) {
+  //     throw new Error(error);
+  //   }
+  // }
 
   const errorList = Object.entries(errors)
 
@@ -206,6 +221,14 @@ const AddItemForm = () => {
 
         <br></br>
         <br></br>
+
+        <div>
+          {fileLoaded}
+        </div>
+
+        <br></br>
+        <br></br>
+
 
         <button
           type="button"
