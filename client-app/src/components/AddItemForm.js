@@ -9,8 +9,7 @@ const AddItemForm = () => {
   const initialState = {
     name: "",
     description: "",
-    price: "",
-    file: null
+    price: ""
   }
 
   const [items, setItems] = useState([])
@@ -20,6 +19,8 @@ const AddItemForm = () => {
   const [isSubmitted, setIsSubmitted] = useState(false)
 
   const [fileLoaded, setFileLoaded] = useState(0)
+
+  const [selectedFiles, setSelectedFiles] = useState([])
 
   const form = useRef(null)
 
@@ -44,10 +45,17 @@ const AddItemForm = () => {
 
   const handleFileChange = (e) => {
     if(isValidFile(e)){
-      setItem({
-        ...item,
-        file: e.target.files
-      }) 
+
+      let files = [];
+
+      for(let i=0; i<e.target.files.length; i++) {
+        files.push(e.target.files[i])
+      }
+
+      setSelectedFiles(selectedFiles.concat(files))
+
+      // reset file field
+      fileField.current.value = null
     }
   }
 
@@ -134,18 +142,14 @@ const AddItemForm = () => {
 
   const errorList = Object.entries(errors)
 
-  const renderSelectedFiles = () => {
-
-    let selectedFiles = [];
-
-    if(item.file) {
-      for(let x = 0; x < item.file.length; x++) {
-        selectedFiles.push(<div key={x}>{item.file[x].name}</div>)
-      }
-    }
-    
-    return selectedFiles;
-  }
+  const renderSelectedFiles = selectedFiles.map((file, idx) => (
+    <div 
+      style={{ padding: 10, border: '1px solid #ccc' }}
+      key={idx}
+    >
+      {file.name}
+    </div>
+  ))
 
   return(
     <div>
@@ -206,7 +210,7 @@ const AddItemForm = () => {
         <br></br>
 
         <div>
-          { renderSelectedFiles() }
+          { renderSelectedFiles }
         </div>
 
         <br></br>
