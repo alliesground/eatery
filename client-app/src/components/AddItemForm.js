@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import useFormValidation from '../hooks/useFormValidation';
 import axios from 'axios';
+import { Button } from 'react-bootstrap';
 
 const AddItemForm = () => {
 
@@ -228,12 +229,14 @@ const AddItemForm = () => {
           style={{display: "none"}}
         />
 
-        <button
-          type="button"
+        <Button
+          variant="primary"
           onClick={triggerFileField}
         >
+          <i class="bi-paperclip"></i>
           Attach
-        </button>
+        </Button>
+
 
         <br></br>
         <br></br>
