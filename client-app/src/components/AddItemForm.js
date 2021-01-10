@@ -233,7 +233,7 @@ const AddItemForm = () => {
           variant="primary"
           onClick={triggerFileField}
         >
-          <i class="bi-paperclip"></i>
+          <i className="bi-paperclip"></i>
           Attach
         </Button>
 
