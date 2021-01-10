@@ -151,6 +151,10 @@ const AddItemForm = () => {
     </div>
   ))
 
+  const triggerFileField = (e) => {
+    fileField.current.click();
+  }
+
   return(
     <div>
       <ul>
@@ -221,7 +225,15 @@ const AddItemForm = () => {
           multiple
           onChange={handleFileChange}
           ref={fileField}
+          style={{display: "none"}}
         />
+
+        <button
+          type="button"
+          onClick={triggerFileField}
+        >
+          Attach
+        </button>
 
         <br></br>
         <br></br>
