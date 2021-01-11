@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import useFormValidation from '../hooks/useFormValidation';
 import axios from 'axios';
-import { Button } from 'react-bootstrap';
+import S3 from 'aws-sdk/clients/s3';
+import ProgressBar from 'react-bootstrap/ProgressBar';
+import Button from 'react-bootstrap/Button'
 
 const AddItemForm = () => {
 
@@ -13,6 +15,21 @@ const AddItemForm = () => {
     price: ""
   }
 
+  const s3 = new S3({
+    apiVersion: '2006-03-01',
+    region: 'ap-southeast-2',
+    credentials: {
+      accessKeyId: 'AKIAQSJMQ6OMPB75OJ7U',
+      secretAccessKey: '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'
+    }
+  })
+
+  const uploadParams = {
+    Bucket: 'restro-development',
+    Key: 'client-upload123',
+    Body: ''
+  }
+
   const [items, setItems] = useState([])
 
   const [item, setItem] = useState(initialState)
@@ -22,6 +39,8 @@ const AddItemForm = () => {
   const [fileLoaded, setFileLoaded] = useState(0)
 
   const [selectedFiles, setSelectedFiles] = useState([])
+
+  const [filesLoaded, setFilesLoaded] = useState([])
 
   const form = useRef(null)
 
@@ -44,13 +63,52 @@ const AddItemForm = () => {
     })
   }
 
+  useEffect(() => {
+
+    for(let i=0; i<selectedFiles.length; i++) {
+
+      // upload file only if loaded is 0, i.e not uploaded yet.
+      if(filesLoaded[i] === 0) {
+
+        for(let j=0; j<101; j++) {
+          setFilesLoaded(prev => Object.assign([...prev], {[i]: j}))
+        }
+
+        // upload to s3
+        uploadParams.Body = selectedFiles[i]
+
+        s3.upload(uploadParams, function(err, data) {
+          if(err) {
+            console.log("Error", err)
+          }
+          if(data) {
+            console.log("Upload Success", data.Location)
+          }
+        }).
+          on('httpUploadProgress', function(progress) {
+
+            let loaded = Math.round(progress.loaded / progress.total * 100)
+
+            setFilesLoaded(prev => Object.assign([...prev], {[i]: loaded}))
+          })
+      }
+    }
+  }, [selectedFiles]);
+
+  useEffect(() => {
+
+  }, [filesLoaded])
+
   const handleFileChange = (e) => {
     if(isValidFile(e)){
 
       let files = [];
 
       for(let i=0; i<e.target.files.length; i++) {
+
         files.push(e.target.files[i])
+
+        setFilesLoaded(previousVal => [...previousVal].concat(0))
       }
 
       setSelectedFiles(selectedFiles.concat(files))
@@ -67,11 +125,12 @@ const AddItemForm = () => {
   const checkFileMimeType = (e) => {
 
     const files = e.target.files
-    const types = ['image/png', 'image/jpeg', 'image.gif']
+    const types = ['image/png', 'image/jpeg', 'image/gif']
 
     let errMsg = ""
 
     for(const file of files) {
+
       if(types.every(type => file.type !== type)) {
 
         errMsg += file.type + ' is not supported format.\n Only png, jpeg and gif files are supported.'
@@ -90,7 +149,6 @@ const AddItemForm = () => {
 
   const submitForm = () => {
 
-    // adding items locally, not persisted in database
     setItems(items.concat(item))
 
     const data = new FormData(form.current)
@@ -117,29 +175,11 @@ const AddItemForm = () => {
       onUploadProgress: (ProgressEvent) => {
         setFileLoaded(ProgressEvent.loaded / ProgressEvent.total * 100)
       }
-    })
-      .then(res => {
+    }).
+      then(res => {
         console.log(res.statusText)
       })
   }
-
-
-  // async function postItem(data) {
-  //   try {
-  //     let res = await fetch(`${API_URL}/items`, {
-  //       method: 'POST',
-  //       body: data,
-  //       headers: {
-  //         'Accept': 'application/json'
-  //       }
-  //     });
-
-  //     console.log(res.statusText)
-
-  //   } catch (error) {
-  //     throw new Error(error);
-  //   }
-  // }
 
   const errorList = Object.entries(errors)
 
@@ -149,6 +189,7 @@ const AddItemForm = () => {
       key={idx}
     >
       {file.name}
+      <ProgressBar now={filesLoaded[idx]} label={`${filesLoaded[idx]}%`} />
     </div>
   ))
 
@@ -241,13 +282,11 @@ const AddItemForm = () => {
         <br></br>
         <br></br>
 
-        <div>
-          {fileLoaded}
-        </div>
 
         <br></br>
         <br></br>
 
+        <Button variant="secondary">Primary</Button>{' '}
 
         <button
           type="button"
