@@ -19,8 +19,8 @@ const AddItemForm = () => {
     apiVersion: '2006-03-01',
     region: 'ap-southeast-2',
     credentials: {
-      accessKeyId: 'AKIAQSJMQ6OMPB75OJ7U',
-      secretAccessKey: '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'
+      accessKeyId: process.env.REACT_APP_S3_ACCESS_KEY_ID,
+      secretAccessKey: process.env.REACT_APP_S3_SECRET_ACCESS_KEY
     }
   })
 
