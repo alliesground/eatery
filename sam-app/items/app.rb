@@ -8,24 +8,14 @@ def create(event:, context:)
 
   parsed_event_body = Util.parse_multipart_hash(event)
 
-  mime = parsed_event_body["file"][:mime]
-  file_extension = /\/(.*)/.match(mime)[1]
+  item_name = parsed_event_body["name"][0]
+  item_description = parsed_event_body["description"][0]
+  item_price = parsed_event_body["price"][0]
 
-  index = 1
-  title = 'test_item'
-  key_name = "items/test/#{index}_#{title}.#{file_extension}"
+  puts "Name => #{item_name}, Description: #{item_description}, Price: #{item_price}"
 
-  s3 = Aws::S3::Client.new(
-    access_key_id: 'AKIAQSJMQ6OMPB75OJ7U',
-    secret_access_key: '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',
-    region: 'ap-southeast-2'
-  )
-
-  s3.put_object(
-    bucket: 'restro-development',
-    key: key_name,
-    body: Base64.encode64(parsed_event_body["file"][:data])
-  )
+  # Get Uploaded files url from the file's key passed from client
+  # Save Item data with the S3 file url to psql
 
   {
     statusCode: 200,
