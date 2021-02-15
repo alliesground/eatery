@@ -27,7 +27,8 @@ const AddItemForm = () => {
   const uploadParams = {
     Bucket: 'restro-development',
     Key: 'client-upload123',
-    Body: ''
+    Body: '',
+    ACL: 'public-read'
   }
 
   const [items, setItems] = useState([])
@@ -82,7 +83,7 @@ const AddItemForm = () => {
             console.log("Error", err)
           }
           if(data) {
-            console.log("Upload Success", data.Location)
+            console.log("Upload Success", data)
           }
         }).
           on('httpUploadProgress', function(progress) {
@@ -268,6 +269,8 @@ const AddItemForm = () => {
 
         <br></br>
         <br></br>
+
+        <img src="https://restro-development.s3.ap-southeast-2.amazonaws.com/client-upload123" />
 
         <div>
           { renderSelectedFiles }
