@@ -26,8 +26,6 @@ const AddItemForm = () => {
 
   const uploadParams = {
     Bucket: 'restro-development',
-    Key: 'client-upload123',
-    Body: '',
     ACL: 'public-read'
   }
 
@@ -77,6 +75,7 @@ const AddItemForm = () => {
 
         // upload to s3
         uploadParams.Body = selectedFiles[i]
+        uploadParams.Key = `items/id_1/${selectedFiles[i].name}`
 
         s3.upload(uploadParams, function(err, data) {
           if(err) {
