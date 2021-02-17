@@ -269,8 +269,6 @@ const AddItemForm = () => {
         <br></br>
         <br></br>
 
-        <img src="https://restro-development.s3.ap-southeast-2.amazonaws.com/client-upload123" />
-
         <div>
           { renderSelectedFiles }
         </div>
