@@ -151,12 +151,9 @@ const AddItemForm = () => {
 
     setItems(items.concat(item))
 
-    const data = new FormData(form.current)
-    data.delete('file')
+    postItem();
 
-    postItem(data);
-
-    // resetForm()
+    resetForm()
 
     // alert("Successfully added new item")
   }
@@ -171,11 +168,12 @@ const AddItemForm = () => {
     handlePresenceValidation({...item});
   }
 
-  async function postItem(data) {
+  async function postItem() {
+
     try {
       let res = await fetch(`${API_URL}/items`, {
         method: 'POST',
-        body: data
+        body: JSON.stringify(item)
       });
 
       console.log(res);
@@ -183,17 +181,6 @@ const AddItemForm = () => {
       throw new Error(error)
     }
   }
-
-  // const postItem = (data) => {
-  //   axios.post(`${API_URL}/items`, data, {
-  //     onUploadProgress: (ProgressEvent) => {
-  //       setFileLoaded(ProgressEvent.loaded / ProgressEvent.total * 100)
-  //     }
-  //   }).
-  //     then(res => {
-  //       console.log(res.statusText)
-  //     })
-  // }
 
   const errorList = Object.entries(errors)
 

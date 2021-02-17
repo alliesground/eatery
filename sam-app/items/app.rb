@@ -7,13 +7,7 @@ require 'pg'
 
 def create(event:, context:)
 
-  parsed_event_body = Util.parse_multipart_hash(event)
-
-  item_name = parsed_event_body["name"][0]
-  item_description = parsed_event_body["description"][0]
-  item_price = parsed_event_body["price"][0]
-
-  puts "Name => #{item_name}, Description: #{item_description}, Price: #{item_price}"
+  item = JSON.parse(Base64.decode64(event["body"]))
 
   # Get Uploaded files url from the file's key passed from client
   # Save Item data with the S3 file url to psql
@@ -24,7 +18,14 @@ def create(event:, context:)
                     port: 5432, 
                     password: '')
 
-  res = conn.exec( "SELECT count(*) from items" )
+  sql = <<~SQL.gsub(/\s+/, " ").strip
+    INSERT INTO items (name, description, price)
+    VALUES ('#{item['name']}', '#{item['description']}', #{item['price'].to_i});
+  SQL
+
+  res = conn.exec(sql)
+
+  puts "Sql response => #{res}"
 
   {
     statusCode: 200,
