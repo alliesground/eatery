@@ -176,9 +176,7 @@ const AddItemForm = () => {
         body: JSON.stringify(item)
       });
 
-      if(res.status === 500) {
-        alert("INTERNAL SERVER ERROR. Please contact your developer");
-      }
+      alert(await res.text())
       
     } catch(error) {
       alert("Something went wrong. Please contact your Admin");

@@ -20,7 +20,7 @@ def create(event:, context:)
                     password: '')
 
   sql = <<~SQL.gsub(/\s+/, " ").strip
-    INSERT INTO items (name, description, price)
+    INSERT INTO item (name, description, price)
     VALUES ('#{item['name']}', '#{item['description']}', #{item['price'].to_i});
   SQL
 
@@ -35,10 +35,7 @@ def create(event:, context:)
       "Access-Control-Allow-Headers": "Content-Type",
       "Access-Control-Allow-Methods": "OPTIONS,GET,POST"
     },
-    body: {
-      message: "Item created successfully",
-      # location: response.body
-    }.to_json
+    body: "Item created successfully"
   }
 
 rescue StandardError => error
@@ -50,8 +47,6 @@ rescue StandardError => error
       "Access-Control-Allow-Headers": "Content-Type",
       "Access-Control-Allow-Methods": "OPTIONS,GET,POST"
     },
-    body: {
-      message: "InterServerError"
-    }.to_json
+    body: "Internal Server Error."
   }
 end
