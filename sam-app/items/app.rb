@@ -1,5 +1,6 @@
 # require 'httparty'
 require 'aws-sdk-s3'
+require 'aws-sdk'
 require 'json'
 require 'base64'
 require './util'
@@ -37,6 +38,20 @@ def create(event:, context:)
     body: {
       message: "Item created successfully",
       # location: response.body
+    }.to_json
+  }
+
+rescue StandardError => error
+
+  {
+    statusCode: 500,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "Content-Type",
+      "Access-Control-Allow-Methods": "OPTIONS,GET,POST"
+    },
+    body: {
+      message: "InterServerError"
     }.to_json
   }
 end
