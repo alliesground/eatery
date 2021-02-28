@@ -12,7 +12,8 @@ const AddItemForm = () => {
   const initialState = {
     name: "",
     description: "",
-    price: ""
+    price: "",
+    imageUrls: []
   }
 
   const s3 = new S3({
@@ -81,8 +82,12 @@ const AddItemForm = () => {
           if(err) {
             console.log("Error", err)
           }
+
           if(data) {
-            console.log("Upload Success", data)
+
+            setItem(prev => (
+              Object.assign({...prev}, {imageUrls: prev.imageUrls.concat(data.Location)})
+            ))
           }
         }).
           on('httpUploadProgress', function(progress) {

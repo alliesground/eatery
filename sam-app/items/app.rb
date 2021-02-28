@@ -10,23 +10,32 @@ def create(event:, context:)
 
   item = JSON.parse(Base64.decode64(event["body"]))
 
-  # Get Uploaded files url from the file's key passed from client
-  # Save Item data with the S3 file url to psql
-
-  conn = PG.connect(dbname: 'eatery', 
+  @conn = PG.connect(dbname: 'eatery', 
                     user: 'eatery', 
                     host: 'db', 
                     port: 5432, 
                     password: '')
 
-  sql = <<~SQL.gsub(/\s+/, " ").strip
-    INSERT INTO item (name, description, price)
-    VALUES ('#{item['name']}', '#{item['description']}', #{item['price'].to_i});
+  create_item = <<~SQL.gsub(/\s+/, " ").strip
+    INSERT INTO items (name, description, price)
+    VALUES ('#{item['name']}', '#{item['description']}', #{item['price'].to_i}) RETURNING id;
   SQL
 
-  res = conn.exec(sql)
+  create_item_image = <<~SQL.gsub(/\s+/, " ").strip
+    INSERT INTO images (url, item_id)
+    VALUES ($1, $2);
+  SQL
 
-  puts "Sql response => #{res}"
+  @conn.transaction do |conn|
+    res = conn.exec(create_item)
+    item_id = res[0]['id']
+
+    item['imageUrls'].each do |url|
+      conn.exec_params(create_item_image, [url, item_id]).clear
+    end
+
+    res.clear
+  end
 
   {
     statusCode: 200,
@@ -39,6 +48,7 @@ def create(event:, context:)
   }
 
 rescue StandardError => error
+  puts "Error => #{error}"
 
   {
     statusCode: 500,
