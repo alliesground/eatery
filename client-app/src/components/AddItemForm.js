@@ -1,18 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
-import useFormValidation from '../hooks/useFormValidation';
 import axios from 'axios';
 import S3 from 'aws-sdk/clients/s3';
 import ProgressBar from 'react-bootstrap/ProgressBar';
-import Button from 'react-bootstrap/Button'
+import Button from 'react-bootstrap/Button';
+import { useForm } from 'react-hook-form';
 
 const AddItemForm = () => {
 
   const API_URL = "http://localhost:3000"
 
   const initialState = {
-    name: "",
-    description: "",
-    price: "",
     imageUrls: []
   }
 
@@ -30,9 +27,7 @@ const AddItemForm = () => {
     ACL: 'public-read'
   }
 
-  const [items, setItems] = useState([])
-
-  const [item, setItem] = useState(initialState)
+  const [imageUrls, setImageUrls] = useState([])
 
   const [isSubmitted, setIsSubmitted] = useState(false)
 
@@ -42,25 +37,18 @@ const AddItemForm = () => {
 
   const [filesLoaded, setFilesLoaded] = useState([])
 
+  const { register, handleSubmit, errors } = useForm();
+
   const form = useRef(null)
 
-  const fileField = useRef(null)
+  const fileField = useRef()
 
-  const resetForm = () => {
-    setItem({
-      name: '',
-      description: '',
-      price: ''
-    })
+  const resetForm = (e) => {
 
-    fileField.current.value = null
-  }
+    e.target.reset();
 
-  const handleItemChange = (e) => {
-    setItem({
-      ...item,
-      [e.target.name]: e.target.value
-    })
+    // reset selected files UI
+    setSelectedFiles([])
   }
 
   useEffect(() => {
@@ -85,9 +73,7 @@ const AddItemForm = () => {
 
           if(data) {
 
-            setItem(prev => (
-              Object.assign({...prev}, {imageUrls: prev.imageUrls.concat(data.Location)})
-            ))
+            setImageUrls(prev => (prev.concat(data.Location)))
           }
         }).
           on('httpUploadProgress', function(progress) {
@@ -105,6 +91,7 @@ const AddItemForm = () => {
   }, [filesLoaded])
 
   const handleFileChange = (e) => {
+
     if(isValidFile(e)){
 
       let files = [];
@@ -152,33 +139,22 @@ const AddItemForm = () => {
     return true
   }
 
-  const submitForm = () => {
+  const submitForm = (data, e) => {
 
-    setItems(items.concat(item))
+    data.imageUrls = imageUrls
+    postItem(data);
 
-    postItem();
-
-    resetForm()
+    resetForm(e)
 
     // alert("Successfully added new item")
   }
 
-  const {
-    handlePresenceValidation,
-    errors
-  } = useFormValidation(submitForm, isSubmitted)
-
-  const handleSubmit = (e) => {
-    setIsSubmitted(true)
-    handlePresenceValidation({...item});
-  }
-
-  async function postItem() {
+  async function postItem(data) {
 
     try {
       let res = await fetch(`${API_URL}/items`, {
         method: 'POST',
-        body: JSON.stringify(item)
+        body: JSON.stringify(data)
       });
 
       alert(await res.text())
@@ -187,8 +163,6 @@ const AddItemForm = () => {
       alert("Something went wrong. Please contact your Admin");
     }
   }
-
-  const errorList = Object.entries(errors)
 
   const renderSelectedFiles = selectedFiles.map((file, idx) => (
     <div 
@@ -206,35 +180,17 @@ const AddItemForm = () => {
 
   return(
     <div>
-      <ul>
-        {
-          errorList.map((err, idx) => (
-            <li key={idx}>
-              {err[0]}: {err[1]}
-            </li>
-          ))
-        }
-      </ul>
-
-      <ul>
-        {
-          items.map((item, idx) => (
-            <li key={idx}>{item.name}</li>
-          ))
-        }
-      </ul>
 
       <h1>Add Item Form</h1>
 
-      <form ref={form}>
+      <form ref={form} onSubmit={handleSubmit(submitForm)}>
         <input
           type="text" 
           name="name"
           placeholder="Enter name"
-          onChange={handleItemChange}
-          value={item.name}
-        >
-        </input>
+          ref={register({ required: true })}
+        />
+        {errors.name && <span>This field is required</span>}
 
         <br></br>
         <br></br>
@@ -242,10 +198,9 @@ const AddItemForm = () => {
         <textarea
           name="description"
           placeholder="Enter description"
-          onChange={handleItemChange}
-          value={item.description}
-        >
-        </textarea>
+          ref={register({ required: true })}
+        />
+        {errors.description && <span>This field is required</span>}
 
         <br></br>
         <br></br>
@@ -254,10 +209,9 @@ const AddItemForm = () => {
           type="text" 
           name="price"
           placeholder="Enter price"
-          onChange={handleItemChange}
-          value={item.price}
-        >
-        </input>
+          ref={register({ required: true })}
+        />
+        {errors.price && <span>This field is required</span>}
 
         <br></br>
         <br></br>
@@ -278,7 +232,7 @@ const AddItemForm = () => {
         />
 
         <Button
-          variant="primary"
+          variant="secondary"
           onClick={triggerFileField}
         >
           <i className="bi-file-image"></i>{" "}
@@ -293,14 +247,11 @@ const AddItemForm = () => {
         <br></br>
         <br></br>
 
-        <Button variant="secondary">Primary</Button>{' '}
+        <Button variant="primary" type="submit">Submit</Button>{' '}
 
-        <button
-          type="button"
-          onClick={handleSubmit}
-        >
-          Submit
-        </button>
+        <br></br>
+        <br></br>
+
       </form>
     </div>
   )
